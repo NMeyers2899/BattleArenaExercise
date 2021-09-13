@@ -17,7 +17,8 @@ namespace BattleArena
 
     class Game
     {
-        bool gameOver;
+        bool gameOver = false;
+        bool keepName = false;
         int currentScene = 0;
         Character player;
         Character littleDude;
@@ -186,9 +187,12 @@ namespace BattleArena
         /// </summary>
         void GetPlayerName()
         {
-            Console.Write("What is your name, adventurer? \n> ");
-            player.name = Console.ReadLine();
-            Console.Clear();
+            if (!keepName)
+            {
+                Console.Write("What is your name, adventurer? \n> ");
+                player.name = Console.ReadLine();
+                Console.Clear();
+            }
         }
 
         /// <summary>
@@ -197,9 +201,25 @@ namespace BattleArena
         /// </summary>
         public void CharacterSelection()
         {
+            int choice = 0;
+
             GetPlayerName();
 
-            int choice = GetInput( player.name + ", which style of fighting do you align with?", 
+            if (!keepName)
+            {
+               choice = GetInput("Would you like to keep your name?", "Yes.", "No.");
+
+                switch (choice)
+                {
+                    case 1:
+                        keepName = true;
+                        break;
+                    case 2:
+                        break;
+                }
+            }
+
+            choice = GetInput( player.name + ", which style of fighting do you align with?", 
                 "Brute Force!", "Defensive Tactics.");
             
             // Finds out whether the player wants to...
