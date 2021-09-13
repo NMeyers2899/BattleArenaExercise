@@ -4,6 +4,8 @@ using System.Text;
 
 namespace BattleArena
 {
+    // Test
+
     /// <summary>
     /// Represents any entity that exists in game
     /// </summary>
@@ -98,7 +100,8 @@ namespace BattleArena
             int inputReceived = 0;
 
             while (inputReceived != 1 && inputReceived != 2)
-            {//Print options
+            {
+                //Print options
                 Console.WriteLine(description);
                 Console.WriteLine("1. " + option1);
                 Console.WriteLine("2. " + option2);
@@ -219,9 +222,10 @@ namespace BattleArena
                 }
             }
 
-            choice = GetInput( player.name + ", which style of fighting do you align with?", 
+            // Checks to see if the player kept their fighting style from another playthough.
+             choice = GetInput(player.name + ", which style of fighting do you align with?",
                 "Brute Force!", "Defensive Tactics.");
-            
+
             // Finds out whether the player wants to...
             switch (choice)
             {
