@@ -20,7 +20,6 @@ namespace BattleArena
     class Game
     {
         bool gameOver = false;
-        bool keepName = false;
         int currentScene = 0;
         Character player;
         Character littleDude;
@@ -50,22 +49,16 @@ namespace BattleArena
         public void Start()
         {
             // Initalizes the Stats for Little Dude.
-            littleDude.name = "A Little Dude";
-            littleDude.health = 20;
-            littleDude.attackPower = 20;
-            littleDude.defensePower = 5;
+            Character littleDude = new Character { name = "A Little Dude", health = 20, attackPower = 20,
+             defensePower = 5};
 
             // Initalizes the Stats for Big Dude.
-            bigDude.name = "A Big Dude";
-            bigDude.health = 25;
-            bigDude.attackPower = 30;
-            bigDude.defensePower = 10;
+            Character bigDude = new Character { name = "A Little Dude", health = 20, attackPower = 20,
+             defensePower = 5 };
 
             // Initalizes the Stats for The Final Boss.
-            theFinalBoss.name = "Krazarackaraodareda the World Eater";
-            theFinalBoss.health = 40;
-            theFinalBoss.attackPower = 20;
-            theFinalBoss.defensePower = 5;
+            Character theFinalBoss = new Character { name = "Krazarackaraodareda the World Eater", 
+             health = 40, attackPower = 20, defensePower = 5 };
 
             // Initalizes the list of enemies that will be fought in this order.
             enemies = new Character[] { littleDude, bigDude, theFinalBoss };
@@ -93,7 +86,7 @@ namespace BattleArena
         /// <param name="description">The context for the input</param>
         /// <param name="option1">The first option the player can choose</param>
         /// <param name="option2">The second option the player can choose</param>
-        /// <returns></returns>
+        /// <returns> The users input of a given choice. </returns>
         int GetInput(string description, string option1, string option2)
         {
             string input = "";
@@ -143,13 +136,16 @@ namespace BattleArena
             // Finds the current scene for...
             switch (currentScene)
             {
-                // ...character selection.
+                // ...naming their character.
                 case 0:
+                    GetPlayerName();
+                    break;
+                // ...character selection.
+                case 1:
                     CharacterSelection();
-                    currentScene++;
                     break;
                 // ...fighting enemies.
-                case 1:
+                case 2:
                     for (int i = 0; i < enemies.Length; i++)
                     {
                         currentEnemy = enemies[i];
@@ -158,7 +154,7 @@ namespace BattleArena
                     currentScene++;
                     break;
                 // ...asking the player to restart the game.
-                case 2:
+                case 3:
                     DisplayMainMenu();
                     break;
             }
@@ -190,11 +186,19 @@ namespace BattleArena
         /// </summary>
         void GetPlayerName()
         {
-            if (!keepName)
+            Console.Write("What is your name, adventurer? \n> ");
+            player.name = Console.ReadLine();
+            Console.Clear();
+
+            int choice = GetInput("Would you like to keep your name?", "Yes.", "No.");
+
+            switch (choice)
             {
-                Console.Write("What is your name, adventurer? \n> ");
-                player.name = Console.ReadLine();
-                Console.Clear();
+                case 1:
+                    currentScene++;
+                    break;
+                case 2:
+                    break;
             }
         }
 
@@ -205,22 +209,6 @@ namespace BattleArena
         public void CharacterSelection()
         {
             int choice = 0;
-
-            GetPlayerName();
-
-            if (!keepName)
-            {
-               choice = GetInput("Would you like to keep your name?", "Yes.", "No.");
-
-                switch (choice)
-                {
-                    case 1:
-                        keepName = true;
-                        break;
-                    case 2:
-                        break;
-                }
-            }
 
             // Checks to see if the player kept their fighting style from another playthough.
              choice = GetInput(player.name + ", which style of fighting do you align with?",
@@ -242,6 +230,8 @@ namespace BattleArena
                     player.defensePower = 15;
                     break;
             }
+
+            currentScene++;
         }
 
         /// <summary>
@@ -277,7 +267,7 @@ namespace BattleArena
         /// </summary>
         /// <param name="attacker">The character that initiated the attack</param>
         /// <param name="defender">The character that is being attacked</param>
-        /// <returns>The amount of damage done to the defender</returns>
+        /// <returns> The amount of damage done to the defender </returns>
         public void Attack(ref Character attacker, ref Character defender)
         {
             float damage = CalculateDamage(attacker.attackPower, defender.defensePower);
@@ -290,34 +280,32 @@ namespace BattleArena
         /// </summary>
         public void Battle()
         {
-            // Checks to see if both the player and the enemy are still alive.
-            while(player.health > 0 && currentEnemy.health > 0)
-            {
-                // Gives updates on the player and current enemy's stats.
-                DisplayStats(player);
-                Console.WriteLine("");
-                DisplayStats(currentEnemy);
-                Console.WriteLine("");
+            float damageDealt = 0;
 
-                int choice = GetInput(currentEnemy.name + " stands before you! What will you do?", 
-                    "Attack!", "Dodge!");
-                // Finds out if the player wishes to...
-                switch (choice)
-                {
-                    // ...attack, dealing damage to the enemy. In turn taking damage from the enemy.
-                    case 1:
-                        Attack(ref player, ref currentEnemy);
-                        Attack(ref currentEnemy, ref player);
-                        Console.ReadKey(true);
-                        Console.Clear();
-                        break;
-                    // ... dodge the enemy's attack, but deal no damage in return.
-                    case 2:
-                        Console.WriteLine("You dodge " + currentEnemy.name + "!");
-                        Console.ReadKey(true);
-                        Console.Clear();
-                        break;
-                }
+            // Gives updates on the player and current enemy's stats.
+            DisplayStats(player);
+            Console.WriteLine("");
+            DisplayStats(currentEnemy);
+            Console.WriteLine("");
+
+            int choice = GetInput(currentEnemy.name + " stands before you! What will you do?",
+                "Attack!", "Dodge!");
+            // Finds out if the player wishes to...
+            switch (choice)
+            {
+                // ...attack, dealing damage to the enemy. In turn taking damage from the enemy.
+                case 1:
+                    Attack(ref player, ref currentEnemy);
+                    Attack(ref currentEnemy, ref player);
+                    Console.ReadKey(true);
+                    Console.Clear();
+                    break;
+                // ... dodge the enemy's attack, but deal no damage in return.
+                case 2:
+                    Console.WriteLine("You dodge " + currentEnemy.name + "'s attack!");
+                    Console.ReadKey(true);
+                    Console.Clear();
+                    break;
             }
 
             CheckBattleResults();
