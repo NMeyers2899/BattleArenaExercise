@@ -289,7 +289,7 @@ namespace BattleArena
                         break;
                     // ... dodge the enemy's attack, but deal no damage in return.
                     case 2:
-                        Console.WriteLine("You dodge the " + currentEnemy.name + "!");
+                        Console.WriteLine("You dodge " + currentEnemy.name + "!");
                         Console.ReadKey(true);
                         Console.Clear();
                         break;
