@@ -165,7 +165,7 @@ namespace BattleArena
         /// </summary>
         void DisplayMainMenu()
         {
-            int choice = GetInput("Would you like to restart the game?", "Yes!", "No");
+            int choice = GetInput("Would you like to restart the game?", "Yes!", "No.");
             // Finds out whether the player wishes to...
             switch(choice)
             {
@@ -200,7 +200,7 @@ namespace BattleArena
             GetPlayerName();
 
             int choice = GetInput( player.name + ", which style of fighting do you align with?", 
-                "Brute Force!", "Defensive Tactics");
+                "Brute Force!", "Defensive Tactics.");
             
             // Finds out whether the player wants to...
             switch (choice)
