@@ -21,10 +21,8 @@ namespace BattleArena
     {
         bool gameOver = false;
         int currentScene = 0;
+        int currentEnemyIndex = 0;
         Character player;
-        Character littleDude;
-        Character bigDude;
-        Character theFinalBoss;
         Character[] enemies;
         private Character currentEnemy;
 
@@ -50,18 +48,20 @@ namespace BattleArena
         {
             // Initalizes the Stats for Little Dude.
             Character littleDude = new Character { name = "A Little Dude", health = 20, attackPower = 20,
-             defensePower = 5};
+                defensePower = 5};
 
             // Initalizes the Stats for Big Dude.
             Character bigDude = new Character { name = "A Little Dude", health = 20, attackPower = 20,
-             defensePower = 5 };
+                defensePower = 5 };
 
             // Initalizes the Stats for The Final Boss.
             Character theFinalBoss = new Character { name = "Krazarackaraodareda the World Eater", 
-             health = 40, attackPower = 20, defensePower = 5 };
+                health = 40, attackPower = 20, defensePower = 5 };
 
             // Initalizes the list of enemies that will be fought in this order.
             enemies = new Character[] { littleDude, bigDude, theFinalBoss };
+
+            currentEnemy = enemies[currentEnemyIndex];
         }
 
         /// <summary>
@@ -146,12 +146,7 @@ namespace BattleArena
                     break;
                 // ...fighting enemies.
                 case 2:
-                    for (int i = 0; i < enemies.Length; i++)
-                    {
-                        currentEnemy = enemies[i];
-                        Battle();
-                    }
-                    currentScene++;
+                    Battle();
                     break;
                 // ...asking the player to restart the game.
                 case 3:
@@ -318,10 +313,19 @@ namespace BattleArena
         void CheckBattleResults()
         {
             // If the player is still alive and the enemy is dead, it moves on to the next fight.
-            if (player.health > 0 && currentEnemy.health <= 0)
+            if (currentEnemy.health <= 0)
             {
                 Console.WriteLine("You defeated " + currentEnemy.name + "!");
+                currentEnemyIndex++;
 
+                if(currentEnemyIndex >= enemies.Length)
+                {
+                    currentScene = 3;
+                    Console.WriteLine("You are victorious!");
+                    return;
+                }
+
+                currentEnemy = enemies[currentEnemyIndex];
                 Console.ReadKey(true);
                 Console.Clear();
             }
