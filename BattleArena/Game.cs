@@ -11,9 +11,6 @@ namespace BattleArena
         private int _currentEnemyIndex = 0;
         private Entity _player;
         private string _playerName;
-        private float _playerHealth;
-        private float _playerAttackPower;
-        private float _playerDefensePower;
         private Entity[] _enemies;
         private Entity _currentEnemy;
 
@@ -37,6 +34,18 @@ namespace BattleArena
         /// </summary>
         public void Start()
         {
+
+            _gameOver = false;
+
+            _currentScene = 0;
+
+            InitializeEnemies();
+        }
+
+        public void InitializeEnemies()
+        {
+            _currentEnemyIndex = 0;
+
             // Initalizes the Stats for Little Dude.
             Entity littleDude = new Entity("A Little Dude", 20, 10, 5);
 
@@ -50,6 +59,7 @@ namespace BattleArena
             _enemies = new Entity[] { littleDude, bigDude, theFinalBoss };
 
             _currentEnemy = _enemies[_currentEnemyIndex];
+
         }
 
         /// <summary>
@@ -155,6 +165,7 @@ namespace BattleArena
                 // ...restart the game.
                 case 1:
                     _currentScene = 0;
+                    InitializeEnemies();
                     break;
                 // ...end the game.
                 case 2:
@@ -194,7 +205,7 @@ namespace BattleArena
             int choice = 0;
 
             // Checks to see if the _player kept their fighting style from another playthough.
-             choice = GetInput(_player.Name + ", which style of fighting do you align with?",
+             choice = GetInput("Which style of fighting do you align with?",
                 "Brute Force!", "Defensive Tactics.");
 
             // Finds out whether the _player wants to...
@@ -246,10 +257,7 @@ namespace BattleArena
             {
                 // ...attack, dealing damage to the enemy. In turn taking damage from the enemy.
                 case 1:
-                    Attack(ref _player, ref _currentEnemy);
-                    Attack(ref _currentEnemy, ref _player);
-                    Console.ReadKey(true);
-                    Console.Clear();
+                    damageDealt = _player.Attack(_currentEnemy);
                     break;
                 // ... dodge the enemy's attack, but deal no damage in return.
                 case 2:
@@ -258,6 +266,8 @@ namespace BattleArena
                     Console.Clear();
                     break;
             }
+
+            damageDealt = _currentEnemy.Attack(_player);
 
             CheckBattleResults();
         }
@@ -269,7 +279,7 @@ namespace BattleArena
         void CheckBattleResults()
         {
             // If the _player is still alive and the enemy is dead, it moves on to the next fight.
-            if (_currentEnemy.health <= 0)
+            if (_currentEnemy.Health <= 0)
             {
                 Console.WriteLine("You defeated " + _currentEnemy.Name + "!");
                 _currentEnemyIndex++;
@@ -278,6 +288,8 @@ namespace BattleArena
                 {
                     _currentScene = 3;
                     Console.WriteLine("You are victorious!");
+                    Console.ReadKey(true);
+                    Console.Clear();
                     return;
                 }
 
@@ -287,7 +299,7 @@ namespace BattleArena
             }
 
             // If the _player is dead, it asks the _player if they wish to restart the game.
-            if(_player.health <= 0)
+            if(_player.Health <= 0)
             {
                 Console.WriteLine("You have been slain.");
                 DisplayMainMenu();

@@ -80,5 +80,15 @@ namespace BattleArena
 
             return damageTaken;
         }
+
+        /// <summary>
+        /// This entity will attack another entity, dealing damage to it.
+        /// </summary>
+        /// <param name="defender"> The target of the attack. </param>
+        /// <returns> It will return the damage that is being taken. </returns>
+        public float Attack(Entity defender)
+        {
+            return defender.TakeDamage(AttackPower);
+        }
     }
 }
