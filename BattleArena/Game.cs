@@ -4,27 +4,18 @@ using System.Text;
 
 namespace BattleArena
 {
-    // Test
-
-    /// <summary>
-    /// Represents any entity that exists in game
-    /// </summary>
-    struct Character
-    {
-        public string name;
-        public float health;
-        public float attackPower;
-        public float defensePower;
-    }
-
     class Game
     {
-        bool gameOver = false;
-        int currentScene = 0;
-        int currentEnemyIndex = 0;
-        Character player;
-        Character[] enemies;
-        private Character currentEnemy;
+        private bool _gameOver = false;
+        private int _currentScene = 0;
+        private int _currentEnemyIndex = 0;
+        private Entity _player;
+        private string _playerName;
+        private float _playerHealth;
+        private float _playerAttackPower;
+        private float _playerDefensePower;
+        private Entity[] _enemies;
+        private Entity _currentEnemy;
 
         /// <summary>
         /// Function that starts the main game loop
@@ -33,7 +24,7 @@ namespace BattleArena
         {
             Start();
 
-            while (!gameOver)
+            while (!_gameOver)
             {
                 Update();
             }
@@ -47,21 +38,18 @@ namespace BattleArena
         public void Start()
         {
             // Initalizes the Stats for Little Dude.
-            Character littleDude = new Character { name = "A Little Dude", health = 20, attackPower = 20,
-                defensePower = 5};
+            Entity littleDude = new Entity("A Little Dude", 20, 10, 5);
 
             // Initalizes the Stats for Big Dude.
-            Character bigDude = new Character { name = "A Little Dude", health = 20, attackPower = 20,
-                defensePower = 5 };
+            Entity bigDude = new Entity("A Big Dude", 25, 15, 10);
 
             // Initalizes the Stats for The Final Boss.
-            Character theFinalBoss = new Character { name = "Krazarackaraodareda the World Eater", 
-                health = 40, attackPower = 20, defensePower = 5 };
+            Entity theFinalBoss = new Entity("Krazarackaradareda the World Eater", 40, 20, 5);
 
-            // Initalizes the list of enemies that will be fought in this order.
-            enemies = new Character[] { littleDude, bigDude, theFinalBoss };
+            // Initalizes the list of _enemies that will be fought in this order.
+            _enemies = new Entity[] { littleDude, bigDude, theFinalBoss };
 
-            currentEnemy = enemies[currentEnemyIndex];
+            _currentEnemy = _enemies[_currentEnemyIndex];
         }
 
         /// <summary>
@@ -77,15 +65,15 @@ namespace BattleArena
         /// </summary>
         public void End()
         {
-            Console.WriteLine("Farewell " + player.name + "!");
+            Console.WriteLine("Farewell " + _player.Name + "!");
         }
 
         /// <summary>
-        /// Gets an input from the player based on some given decision
+        /// Gets an input from the _player based on some given decision
         /// </summary>
         /// <param name="description">The context for the input</param>
-        /// <param name="option1">The first option the player can choose</param>
-        /// <param name="option2">The second option the player can choose</param>
+        /// <param name="option1">The first option the _player can choose</param>
+        /// <param name="option2">The second option the _player can choose</param>
         /// <returns> The users input of a given choice. </returns>
         int GetInput(string description, string option1, string option2)
         {
@@ -100,16 +88,16 @@ namespace BattleArena
                 Console.WriteLine("2. " + option2);
                 Console.Write("> ");
 
-                //Get input from player
+                //Get input from _player
                 input = Console.ReadLine();
 
-                //If player selected the first option...
+                //If _player selected the first option...
                 if (input == "1" || input == option1)
                 {
                     //Set input received to be the first option
                     inputReceived = 1;
                 }
-                //Otherwise if the player selected the second option...
+                //Otherwise if the _player selected the second option...
                 else if (input == "2" || input == option2)
                 {
                     //Set input received to be the second option
@@ -134,7 +122,7 @@ namespace BattleArena
         void DisplayCurrentScene()
         {
             // Finds the current scene for...
-            switch (currentScene)
+            switch (_currentScene)
             {
                 // ...naming their character.
                 case 0:
@@ -144,11 +132,11 @@ namespace BattleArena
                 case 1:
                     CharacterSelection();
                     break;
-                // ...fighting enemies.
+                // ...fighting _enemies.
                 case 2:
                     Battle();
                     break;
-                // ...asking the player to restart the game.
+                // ...asking the _player to restart the game.
                 case 3:
                     DisplayMainMenu();
                     break;
@@ -156,33 +144,33 @@ namespace BattleArena
         }
 
         /// <summary>
-        /// Displays the menu that allows the player to start or quit the game
+        /// Displays the menu that allows the _player to start or quit the game
         /// </summary>
         void DisplayMainMenu()
         {
             int choice = GetInput("Would you like to restart the game?", "Yes!", "No.");
-            // Finds out whether the player wishes to...
+            // Finds out whether the _player wishes to...
             switch(choice)
             {
                 // ...restart the game.
                 case 1:
-                    currentScene = 0;
+                    _currentScene = 0;
                     break;
                 // ...end the game.
                 case 2:
-                    gameOver = true;
+                    _gameOver = true;
                     break;
             }
         }
 
         /// <summary>
         /// Displays text asking for the players name. Doesn't transition to the next section
-        /// until the player decides to keep the name.
+        /// until the _player decides to keep the name.
         /// </summary>
         void GetPlayerName()
         {
             Console.Write("What is your name, adventurer? \n> ");
-            player.name = Console.ReadLine();
+            _playerName = Console.ReadLine();
             Console.Clear();
 
             int choice = GetInput("Would you like to keep your name?", "Yes.", "No.");
@@ -190,7 +178,7 @@ namespace BattleArena
             switch (choice)
             {
                 case 1:
-                    currentScene++;
+                    _currentScene++;
                     break;
                 case 2:
                     break;
@@ -198,78 +186,46 @@ namespace BattleArena
         }
 
         /// <summary>
-        /// Gets the players choice of character. Updates player stats based on
+        /// Gets the players choice of character. Updates _player stats based on
         /// the character chosen.
         /// </summary>
         public void CharacterSelection()
         {
             int choice = 0;
 
-            // Checks to see if the player kept their fighting style from another playthough.
-             choice = GetInput(player.name + ", which style of fighting do you align with?",
+            // Checks to see if the _player kept their fighting style from another playthough.
+             choice = GetInput(_player.Name + ", which style of fighting do you align with?",
                 "Brute Force!", "Defensive Tactics.");
 
-            // Finds out whether the player wants to...
+            // Finds out whether the _player wants to...
             switch (choice)
             {
                 // ...be a more physical fighter.
                 case 1:
-                    player.health = 100;
-                    player.attackPower = 35;
-                    player.defensePower = 10;
+                    _player = new Entity(_playerName, 100, 35, 10);
                     break;
                 // ...or rely on defense more.
                 case 2:
-                    player.health = 75;
-                    player.attackPower = 20;
-                    player.defensePower = 15;
+                    _player = new Entity(_playerName, 75, 20, 15);
                     break;
             }
 
-            currentScene++;
+            _currentScene++;
         }
 
         /// <summary>
         /// Prints a characters stats to the console
         /// </summary>
         /// <param name="character">The character that will have its stats shown</param>
-        void DisplayStats(Character character)
+        void DisplayStats(Entity character)
         {
-            Console.WriteLine(character.name + "'s stats:");
-            Console.WriteLine("Health: " + character.health);
-            Console.WriteLine("Attack: " + character.attackPower);
-            Console.WriteLine("Defense: " + character.defensePower);
+            Console.WriteLine(character.Name + "'s stats:");
+            Console.WriteLine("Health: " + character.Health);
+            Console.WriteLine("Attack: " + character.AttackPower);
+            Console.WriteLine("Defense: " + character.DefensePower);
         }
 
-        /// <summary>
-        /// Calculates the amount of damage that will be done to a character
-        /// </summary>
-        /// <param name="attackPower">The attacking character's attack power</param>
-        /// <param name="defensePower">The defending character's defense power</param>
-        /// <returns>The amount of damage done to the defender</returns>
-        float CalculateDamage(float attackPower, float defensePower)
-        {
-            if (attackPower - defensePower < 0)
-            {
-                return 0;
-            }
-
-            return attackPower - defensePower;
-        }
-
-        /// <summary>
-        /// Deals damage to a character based on an attacker's attack power
-        /// </summary>
-        /// <param name="attacker">The character that initiated the attack</param>
-        /// <param name="defender">The character that is being attacked</param>
-        /// <returns> The amount of damage done to the defender </returns>
-        public void Attack(ref Character attacker, ref Character defender)
-        {
-            float damage = CalculateDamage(attacker.attackPower, defender.defensePower);
-            Console.WriteLine(attacker.name + " deals " + damage + " to " + defender.name + "!");
-            defender.health -= damage;
-        }
-
+       
         /// <summary>
         /// Simulates one turn in the current monster fight
         /// </summary>
@@ -277,27 +233,27 @@ namespace BattleArena
         {
             float damageDealt = 0;
 
-            // Gives updates on the player and current enemy's stats.
-            DisplayStats(player);
+            // Gives updates on the _player and current enemy's stats.
+            DisplayStats(_player);
             Console.WriteLine("");
-            DisplayStats(currentEnemy);
+            DisplayStats(_currentEnemy);
             Console.WriteLine("");
 
-            int choice = GetInput(currentEnemy.name + " stands before you! What will you do?",
+            int choice = GetInput(_currentEnemy.Name + " stands before you! What will you do?",
                 "Attack!", "Dodge!");
-            // Finds out if the player wishes to...
+            // Finds out if the _player wishes to...
             switch (choice)
             {
                 // ...attack, dealing damage to the enemy. In turn taking damage from the enemy.
                 case 1:
-                    Attack(ref player, ref currentEnemy);
-                    Attack(ref currentEnemy, ref player);
+                    Attack(ref _player, ref _currentEnemy);
+                    Attack(ref _currentEnemy, ref _player);
                     Console.ReadKey(true);
                     Console.Clear();
                     break;
                 // ... dodge the enemy's attack, but deal no damage in return.
                 case 2:
-                    Console.WriteLine("You dodge " + currentEnemy.name + "'s attack!");
+                    Console.WriteLine("You dodge " + _currentEnemy.Name + "'s attack!");
                     Console.ReadKey(true);
                     Console.Clear();
                     break;
@@ -307,31 +263,31 @@ namespace BattleArena
         }
 
         /// <summary>
-        /// Checks to see if either the player or the enemy has won the current battle.
+        /// Checks to see if either the _player or the enemy has won the current battle.
         /// Updates the game based on who won the battle..
         /// </summary>
         void CheckBattleResults()
         {
-            // If the player is still alive and the enemy is dead, it moves on to the next fight.
-            if (currentEnemy.health <= 0)
+            // If the _player is still alive and the enemy is dead, it moves on to the next fight.
+            if (_currentEnemy.health <= 0)
             {
-                Console.WriteLine("You defeated " + currentEnemy.name + "!");
-                currentEnemyIndex++;
+                Console.WriteLine("You defeated " + _currentEnemy.Name + "!");
+                _currentEnemyIndex++;
 
-                if(currentEnemyIndex >= enemies.Length)
+                if(_currentEnemyIndex >= _enemies.Length)
                 {
-                    currentScene = 3;
+                    _currentScene = 3;
                     Console.WriteLine("You are victorious!");
                     return;
                 }
 
-                currentEnemy = enemies[currentEnemyIndex];
+                _currentEnemy = _enemies[_currentEnemyIndex];
                 Console.ReadKey(true);
                 Console.Clear();
             }
 
-            // If the player is dead, it asks the player if they wish to restart the game.
-            if(player.health <= 0)
+            // If the _player is dead, it asks the _player if they wish to restart the game.
+            if(_player.health <= 0)
             {
                 Console.WriteLine("You have been slain.");
                 DisplayMainMenu();
