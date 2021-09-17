@@ -4,15 +4,23 @@ using System.Text;
 
 namespace BattleArena
 {
+    public struct Item
+    {
+        public string name;
+        public float StatBoost;
+    }
+
     class Game
     {
         private bool _gameOver = false;
         private int _currentScene = 0;
         private int _currentEnemyIndex = 0;
-        private Entity _player;
+        private Player _player;
         private string _playerName;
         private Entity[] _enemies;
         private Entity _currentEnemy;
+        private Item[] _offensiveInventory;
+        private Item[] _defensiveInventory;
 
         /// <summary>
         /// Function that starts the main game loop
@@ -32,17 +40,38 @@ namespace BattleArena
         /// <summary>
         /// Function used to initialize any starting values by default
         /// </summary>
-        public void Start()
+        private void Start()
         {
-
             _gameOver = false;
 
             _currentScene = 0;
 
             InitializeEnemies();
+
+            InitializeItems();
         }
 
-        public void InitializeEnemies()
+        /// <summary>
+        /// Initalizes the items for the different classes
+        /// </summary>
+        public void InitializeItems()
+        {
+            // Defensive Items
+            Item bigWand = new Item { name = "Big Wand", StatBoost = 5 };
+            Item bigShield = new Item { name = "Big Shield", StatBoost = 15 };
+
+            // Offensive Items
+            Item bigStick = new Item { name = "Big Stick", StatBoost = 10 };
+            Item freshJays = new Item { name = "Fresh Jays", StatBoost = 5 };
+
+            _defensiveInventory = new Item[] { bigWand, bigShield };
+            _offensiveInventory = new Item[] { bigStick, freshJays };
+         }
+
+        /// <summary>
+        /// Initalizes the enemies on start and restart of the game.
+        /// </summary>
+        private void InitializeEnemies()
         {
             _currentEnemyIndex = 0;
 
@@ -65,7 +94,7 @@ namespace BattleArena
         /// <summary>
         /// This function is called every time the game loops.
         /// </summary>
-        public void Update()
+        private void Update()
         {
             DisplayCurrentScene();
         }
@@ -73,7 +102,7 @@ namespace BattleArena
         /// <summary>
         /// This function is called before the applications closes
         /// </summary>
-        public void End()
+        private void End()
         {
             Console.WriteLine("Farewell " + _player.Name + "!");
         }
@@ -82,54 +111,47 @@ namespace BattleArena
         /// Gets an input from the _player based on some given decision
         /// </summary>
         /// <param name="description">The context for the input</param>
-        /// <param name="option1">The first option the _player can choose</param>
-        /// <param name="option2">The second option the _player can choose</param>
         /// <returns> The users input of a given choice. </returns>
-        int GetInput(string description, string option1, string option2)
+        private int GetInput(string description, params string[] options)
         {
             string input = "";
-            int inputReceived = 0;
+            int inputRecieved = -1;
 
-            while (inputReceived != 1 && inputReceived != 2)
+            while(inputRecieved == -1)
             {
-                //Print options
+                // Print out all options.
                 Console.WriteLine(description);
-                Console.WriteLine("1. " + option1);
-                Console.WriteLine("2. " + option2);
+                for(int i = 0; i < options.Length; i++)
+                {
+                    Console.WriteLine((i + 1) + ". " + options[i]);
+                }
                 Console.Write("> ");
 
-                //Get input from _player
                 input = Console.ReadLine();
 
-                //If _player selected the first option...
-                if (input == "1" || input == option1)
+                // If a player typed an int...
+                if(int.TryParse(input, out inputRecieved))
                 {
-                    //Set input received to be the first option
-                    inputReceived = 1;
+                    // ...decrement the input and check if it's within bounds of the array.
+                    inputRecieved--;
+                    if(inputRecieved < 0 || inputRecieved >= options.Length)
+                    {
+                        // Sets inputRecieved to the default value.
+                        inputRecieved = -1;
+                        //Display error message.
+                        Console.WriteLine("Invalid Input");
+                        Console.ReadKey(true);
+                    }
                 }
-                //Otherwise if the _player selected the second option...
-                else if (input == "2" || input == option2)
-                {
-                    //Set input received to be the second option
-                    inputReceived = 2;
-                }
-                //If neither are true...
-                else
-                {
-                    //...display error message
-                    Console.WriteLine("Invalid Input");
-                    Console.ReadKey();
-                }
-
-                Console.Clear();
             }
-            return inputReceived;
+
+            return inputRecieved;
         }
 
         /// <summary>
         /// Calls the appropriate function(s) based on the current scene index
         /// </summary>
-        void DisplayCurrentScene()
+        private void DisplayCurrentScene()
         {
             // Finds the current scene for...
             switch (_currentScene)
@@ -156,7 +178,7 @@ namespace BattleArena
         /// <summary>
         /// Displays the menu that allows the _player to start or quit the game
         /// </summary>
-        void DisplayMainMenu()
+        private void DisplayMainMenu()
         {
             int choice = GetInput("Would you like to restart the game?", "Yes!", "No.");
             // Finds out whether the _player wishes to...
@@ -197,7 +219,7 @@ namespace BattleArena
         }
 
         /// <summary>
-        /// Gets the players choice of character. Updates _player stats based on
+        /// Gets the players choice of character. Updates player stats based on
         /// the character chosen.
         /// </summary>
         public void CharacterSelection()
@@ -213,11 +235,11 @@ namespace BattleArena
             {
                 // ...be a more physical fighter.
                 case 1:
-                    _player = new Entity(_playerName, 100, 35, 10);
+                    _player = new Player(_playerName, 100, 35, 10, _offensiveInventory);
                     break;
                 // ...or rely on defense more.
                 case 2:
-                    _player = new Entity(_playerName, 75, 20, 15);
+                    _player = new Player(_playerName, 75, 20, 15, _defensiveInventory);
                     break;
             }
 
@@ -227,7 +249,7 @@ namespace BattleArena
         /// <summary>
         /// Prints a characters stats to the console
         /// </summary>
-        /// <param name="character">The character that will have its stats shown</param>
+        /// <param name="character"> The character that will have its stats shown </param>
         void DisplayStats(Entity character)
         {
             Console.WriteLine(character.Name + "'s stats:");
@@ -251,7 +273,7 @@ namespace BattleArena
             Console.WriteLine("");
 
             int choice = GetInput(_currentEnemy.Name + " stands before you! What will you do?",
-                "Attack!", "Dodge!");
+                "Attack!", "Equip Item.");
             // Finds out if the _player wishes to...
             switch (choice)
             {
@@ -261,9 +283,6 @@ namespace BattleArena
                     break;
                 // ... dodge the enemy's attack, but deal no damage in return.
                 case 2:
-                    Console.WriteLine("You dodge " + _currentEnemy.Name + "'s attack!");
-                    Console.ReadKey(true);
-                    Console.Clear();
                     break;
             }
 
