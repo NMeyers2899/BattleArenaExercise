@@ -325,5 +325,29 @@ namespace BattleArena
             }
         }
 
+        /// <summary>
+        /// Takes in an array and a number given by the user and adds the number to the end of the array.
+        /// </summary>
+        /// <param name="arr"> The array of integers. </param>
+        /// <param name="num"> The new number. </param>
+        /// <returns> The new array with the number appended to the end. </returns>
+        private int[] AppendToArray(int[] arr, int num)
+        {
+            // Creates a new array that will store the values of the old array and a new one.
+            int[] appendedArray = new int[arr.Length + 1];
+
+            // Iterates through the old array, giving the new array the values of the old one.
+            for(int i = 0; i < arr.Length; i++)
+            {
+                appendedArray[i] = arr[i];
+            }
+
+            // Adds the number given by the user to the final spot in the new array.
+            appendedArray[arr.Length] = num;
+
+            // Returns the new array.
+            return appendedArray;
+        }
+
     }
 }
