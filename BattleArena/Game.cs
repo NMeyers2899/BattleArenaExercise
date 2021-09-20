@@ -4,13 +4,21 @@ using System.Text;
 
 namespace BattleArena
 {
-    public struct Item
+    public enum ItemType
     {
-        public string name;
-        public float StatBoost;
+        DEFENSE,
+        ATTACK,
+        NONE
     }
 
-    class Game
+    public struct Item
+    {
+        public string Name;
+        public float StatBoost;
+        public int BoostType;
+    }
+
+    public class Game
     {
         private bool _gameOver = false;
         private int _currentScene = 0;
@@ -57,12 +65,12 @@ namespace BattleArena
         public void InitializeItems()
         {
             // Defensive Items
-            Item bigWand = new Item { name = "Big Wand", StatBoost = 5 };
-            Item bigShield = new Item { name = "Big Shield", StatBoost = 15 };
+            Item bigWand = new Item { Name = "Big Wand", StatBoost = 20, BoostType = 1 };
+            Item bigShield = new Item { Name = "Big Shield", StatBoost = 25, BoostType = 0 };
 
             // Offensive Items
-            Item bigStick = new Item { name = "Big Stick", StatBoost = 10 };
-            Item freshJays = new Item { name = "Fresh Jays", StatBoost = 5 };
+            Item bigStick = new Item { Name = "Big Stick", StatBoost = 20, BoostType = 1 };
+            Item freshJays = new Item { Name = "Fresh J's", StatBoost = 10, BoostType = 0 };
 
             _defensiveInventory = new Item[] { bigWand, bigShield };
             _offensiveInventory = new Item[] { bigStick, freshJays };
@@ -76,13 +84,13 @@ namespace BattleArena
             _currentEnemyIndex = 0;
 
             // Initalizes the Stats for Little Dude.
-            Entity littleDude = new Entity("A Little Dude", 20, 10, 5);
+            Entity littleDude = new Entity("A Little Dude", 30, 25, 15);
 
             // Initalizes the Stats for Big Dude.
-            Entity bigDude = new Entity("A Big Dude", 25, 15, 10);
+            Entity bigDude = new Entity("A Big Dude", 35, 30, 20);
 
             // Initalizes the Stats for The Final Boss.
-            Entity theFinalBoss = new Entity("Krazarackaradareda the World Eater", 40, 20, 5);
+            Entity theFinalBoss = new Entity("Krazarackaradareda the World Eater", 45, 35, 20);
 
             // Initalizes the list of _enemies that will be fought in this order.
             _enemies = new Entity[] { littleDude, bigDude, theFinalBoss };
@@ -143,6 +151,17 @@ namespace BattleArena
                         Console.ReadKey(true);
                     }
                 }
+                // If the user didn't type an int.
+                else
+                {
+                    // Sets inputRecieved to the default value.
+                    inputRecieved = -1;
+                    //Display error message.
+                    Console.WriteLine("Invalid Input");
+                    Console.ReadKey(true);
+                }
+
+                Console.Clear();
             }
 
             return inputRecieved;
@@ -185,12 +204,12 @@ namespace BattleArena
             switch(choice)
             {
                 // ...restart the game.
-                case 1:
+                case 0:
                     _currentScene = 0;
                     InitializeEnemies();
                     break;
                 // ...end the game.
-                case 2:
+                case 1:
                     _gameOver = true;
                     break;
             }
@@ -210,10 +229,10 @@ namespace BattleArena
 
             switch (choice)
             {
-                case 1:
+                case 0:
                     _currentScene++;
                     break;
-                case 2:
+                case 1:
                     break;
             }
         }
@@ -234,11 +253,11 @@ namespace BattleArena
             switch (choice)
             {
                 // ...be a more physical fighter.
-                case 1:
+                case 0:
                     _player = new Player(_playerName, 100, 35, 10, _offensiveInventory);
                     break;
                 // ...or rely on defense more.
-                case 2:
+                case 1:
                     _player = new Player(_playerName, 75, 20, 15, _defensiveInventory);
                     break;
             }
@@ -258,7 +277,26 @@ namespace BattleArena
             Console.WriteLine("Defense: " + character.DefensePower);
         }
 
-       
+       public void DisplayEquipItemMenu()
+       {
+            // Get the item index.
+            int choice = GetInput("Select an item to equip.", _player.GetItemNames());
+
+            // Equip the item of the given index.
+            _player.TryEquipItem(choice);
+
+            if (!_player.TryEquipItem(choice))
+            {
+                Console.WriteLine("You couldn't find that item in the bag.");
+                Console.ReadKey(true);
+                Console.Clear();
+            }
+
+            Console.WriteLine("You equipped " + _player.CurrentItem.Name + "!");
+            Console.ReadKey(true);
+            Console.Clear();
+       }
+
         /// <summary>
         /// Simulates one turn in the current monster fight
         /// </summary>
@@ -273,17 +311,18 @@ namespace BattleArena
             Console.WriteLine("");
 
             int choice = GetInput(_currentEnemy.Name + " stands before you! What will you do?",
-                "Attack!", "Equip Item.");
+                "Attack!", "Equip Item." , "Remove Current Item");
             // Finds out if the _player wishes to...
             switch (choice)
             {
                 // ...attack, dealing damage to the enemy. In turn taking damage from the enemy.
-                case 1:
+                case 0:
                     damageDealt = _player.Attack(_currentEnemy);
                     break;
                 // ... dodge the enemy's attack, but deal no damage in return.
-                case 2:
-                    break;
+                case 1:
+                    DisplayEquipItemMenu();
+                    return;
             }
 
             damageDealt = _currentEnemy.Attack(_player);

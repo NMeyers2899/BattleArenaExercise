@@ -25,13 +25,13 @@ namespace BattleArena
         }
 
         // Gets the entity's attack power.
-        public float AttackPower
+        public virtual float AttackPower
         {
             get { return _attackPower; }
         }
 
         // Gets the entity's health.
-        public float DefensePower
+        public virtual float DefensePower
         {
             get { return _defensePower; }
         }

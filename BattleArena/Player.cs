@@ -14,11 +14,37 @@ namespace BattleArena
             get { return _currentItem; }
         }
 
+        public override float AttackPower
+        {
+            get
+            {
+                if (_currentItem.BoostType == 1)
+                {
+                    return base.AttackPower + CurrentItem.StatBoost;
+                }
+
+                return base.AttackPower;
+            }
+        }
+
+        public override float DefensePower
+        {
+            get
+            {
+                if(_currentItem.BoostType == 0)
+                {
+                    return base.DefensePower + CurrentItem.StatBoost;
+                }
+
+                return base.DefensePower;
+            }
+        }
+
         public Player(string name, float health, float attackPower, float defensePower, Item[] items) : 
             base(name, health, attackPower, defensePower)
         {
             _items = items;
-            _currentItem.name = "Nothing";
+            _currentItem.Name = "Nothing";
         }
 
         /// <summary>
@@ -48,7 +74,7 @@ namespace BattleArena
         public bool TryUnequipItem()
         {
             // Checks to see if anything is equipped. If it is...
-            if(_currentItem.name == "Nothing")
+            if(_currentItem.Name == "Nothing")
             {
                 // ...it returns false.
                 return false;
@@ -56,9 +82,25 @@ namespace BattleArena
 
             // Sets the item to nothing.
             _currentItem = new Item();
-            _currentItem.name = "Nothing";
+            _currentItem.Name = "Nothing";
 
             return true;
+        }
+
+        /// <summary>
+        /// Gets the list of item names our player currently has.
+        /// </summary>
+        /// <returns> The list of names of items that our player has. </returns>
+        public string[] GetItemNames()
+        {
+            string[] itemNames = new string[_items.Length];
+
+            for(int i = 0; i < _items.Length; i++)
+            {
+                itemNames[i] = _items[i].Name;
+            }
+
+            return itemNames;
         }
     }
 }
