@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 
 namespace BattleArena
 {
@@ -15,7 +16,7 @@ namespace BattleArena
     {
         public string Name;
         public float StatBoost;
-        public int BoostType;
+        public ItemType BoostType;
     }
 
     public class Game
@@ -65,12 +66,12 @@ namespace BattleArena
         public void InitializeItems()
         {
             // Defensive Items
-            Item bigWand = new Item { Name = "Big Wand", StatBoost = 20, BoostType = 1 };
-            Item bigShield = new Item { Name = "Big Shield", StatBoost = 25, BoostType = 0 };
+            Item bigWand = new Item { Name = "Big Wand", StatBoost = 20, BoostType = ItemType.ATTACK };
+            Item bigShield = new Item { Name = "Big Shield", StatBoost = 25, BoostType = ItemType.DEFENSE };
 
             // Offensive Items
-            Item bigStick = new Item { Name = "Big Stick", StatBoost = 20, BoostType = 1 };
-            Item freshJays = new Item { Name = "Fresh J's", StatBoost = 10, BoostType = 0 };
+            Item bigStick = new Item { Name = "Big Stick", StatBoost = 20, BoostType = ItemType.ATTACK };
+            Item freshJays = new Item { Name = "Fresh J's", StatBoost = 10, BoostType = ItemType.DEFENSE };
 
             _defensiveInventory = new Item[] { bigWand, bigShield };
             _offensiveInventory = new Item[] { bigStick, freshJays };
@@ -115,10 +116,27 @@ namespace BattleArena
             Console.WriteLine("Farewell " + _player.Name + "!");
         }
 
+        public void Save()
+        {
+            // Creates a new stream writer.
+            StreamWriter writer = new StreamWriter("SaveData.txt");
+
+            // Saves the current enemy index.
+            writer.WriteLine(_currentEnemyIndex);
+
+            // Saves the player and current enemy.
+            _player.Save(writer);
+            _currentEnemy.Save(writer);
+
+            // Closes the stream writer when finished saving.
+            writer.Close();
+        }
+
         /// <summary>
-        /// Gets an input from the _player based on some given decision
+        /// Gets an input from the player based on some given decision
         /// </summary>
-        /// <param name="description">The context for the input</param>
+        /// <param name="description"> The context for the input </param>
+        /// <param name="options"> The options given to the player. </param>
         /// <returns> The users input of a given choice. </returns>
         private int GetInput(string description, params string[] options)
         {
@@ -195,7 +213,7 @@ namespace BattleArena
         }
 
         /// <summary>
-        /// Displays the menu that allows the _player to start or quit the game
+        /// Displays the menu that allows the player to start or quit the game
         /// </summary>
         private void DisplayMainMenu()
         {
@@ -311,7 +329,7 @@ namespace BattleArena
             Console.WriteLine("");
 
             int choice = GetInput(_currentEnemy.Name + " stands before you! What will you do?",
-                "Attack!", "Equip Item." , "Remove Current Item");
+                "Attack!", "Equip Item.", "Remove Current Item.", "Save.");
             // Finds out if the _player wishes to...
             switch (choice)
             {
@@ -323,6 +341,25 @@ namespace BattleArena
                 case 1:
                     DisplayEquipItemMenu();
                     return;
+                case 2:
+                    if (!_player.TryUnequipItem())
+                    {
+                        Console.WriteLine("You don't have anything equipped.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("You placed the item in your bag.");
+                    }
+
+                    Console.ReadKey(true);
+                    Console.Clear();
+                    return;
+                case 3:
+                    Save();
+                    Console.WriteLine("Saved Game");
+                    Console.ReadKey(true);
+                    Console.Clear();
+                    return;
             }
 
             damageDealt = _currentEnemy.Attack(_player);
@@ -332,7 +369,7 @@ namespace BattleArena
 
         /// <summary>
         /// Checks to see if either the _player or the enemy has won the current battle.
-        /// Updates the game based on who won the battle..
+        /// Updates the game based on who won the battle.
         /// </summary>
         void CheckBattleResults()
         {
