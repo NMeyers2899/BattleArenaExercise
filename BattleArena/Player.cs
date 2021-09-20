@@ -10,6 +10,7 @@ namespace BattleArena
         private Item[] _items;
         private Item _currentItem;
         private int _currentItemIndex;
+        private string _job;
 
         public Item CurrentItem
         {
@@ -42,11 +43,36 @@ namespace BattleArena
             }
         }
 
-        public Player(string name, float health, float attackPower, float defensePower, Item[] items) : 
+        public string Job
+        {
+            get
+            {
+                return _job;
+            }
+            set
+            {
+                _job = value;
+            }
+        }
+
+        public Player()
+        {
+            _items = new Item[0];
+            _currentItem.Name = "Nothing";
+        }
+
+        public Player(Item[] items) : base()
+        {
+            _currentItem.Name = "Nothing";
+            _items = items;
+        }
+
+        public Player(string name, float health, float attackPower, float defensePower, Item[] items, string job) : 
             base(name, health, attackPower, defensePower)
         {
             _items = items;
             _currentItem.Name = "Nothing";
+            _job = job;
         }
 
         /// <summary>
@@ -111,8 +137,29 @@ namespace BattleArena
 
         public override void Save(StreamWriter writer)
         {
+            writer.WriteLine(_job);
             base.Save(writer);
             writer.WriteLine(_currentItemIndex);
+        }
+
+        public override bool Load(StreamReader reader)
+        {
+            // Checks to see if the base load of the entity fails.
+            if (!base.Load(reader))
+            {
+                return false;
+            }
+
+            // Checks to see if it can get the current item index.
+            if(!int.TryParse(reader.ReadLine(), out _currentItemIndex))
+            {
+                return false;
+            }
+
+            // If everything was found correctly, it attempts to equip the item.
+            TryEquipItem(_currentItemIndex);
+
+            return true;
         }
     }
 }

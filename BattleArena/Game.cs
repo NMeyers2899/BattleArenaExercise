@@ -12,6 +12,15 @@ namespace BattleArena
         NONE
     }
 
+    public enum Scene
+    {
+        STARTMENU,
+        NAMECREATION,
+        CHARACTERSELECTION,
+        BATTLE,
+        RESTARTMENU
+    }
+
     public struct Item
     {
         public string Name;
@@ -22,7 +31,7 @@ namespace BattleArena
     public class Game
     {
         private bool _gameOver = false;
-        private int _currentScene = 0;
+        private Scene _currentScene = 0;
         private int _currentEnemyIndex = 0;
         private Player _player;
         private string _playerName;
@@ -58,6 +67,68 @@ namespace BattleArena
             InitializeEnemies();
 
             InitializeItems();
+        }
+
+        public bool Load()
+        {
+            // If the file doesn't exist...
+            if (!File.Exists("SaveData.txt"))
+            {
+                // ...it returns false.
+                return false;
+            }
+
+            // Creates a reader.
+            StreamReader reader = new StreamReader("SaveData.txt");
+
+            // If the first line can't be converted to an integer...
+            if (!int.TryParse(reader.ReadLine(), out _currentEnemyIndex))
+            {
+                // ...it returns false.
+                return false;
+            }
+
+            string job = reader.ReadLine();
+
+            if(job == "Offensive")
+            {
+                _player = new Player(_offensiveInventory);
+            }
+            else if(job == "Defensive")
+            {
+                _player = new Player(_defensiveInventory);
+            }
+            else
+            {
+                return false;
+            }
+
+            _player.Job = job;
+
+            // If the player can't load...
+            if (!_player.Load(reader))
+            {
+                // ..it returns false.
+                return false;
+            }
+
+            // Creates a new instance of the current enemy.
+            _currentEnemy = new Entity();
+
+            // Tries to load the current enemy, if it can't...
+            if (!_currentEnemy.Load(reader))
+            {
+                // ...it returns false.
+                return false;
+            }
+
+            // Updates the enemy array to the current enemy's stats.
+            _enemies[_currentEnemyIndex] = _currentEnemy;
+
+            // This closes the file.
+            reader.Close();
+
+            return true;
         }
 
         /// <summary>
@@ -193,21 +264,24 @@ namespace BattleArena
             // Finds the current scene for...
             switch (_currentScene)
             {
-                // ...naming their character.
-                case 0:
+                // ...the start menu.
+                case Scene.STARTMENU:
+                    DisplayStartMenu();
+                    break;
+                case Scene.NAMECREATION:
                     GetPlayerName();
                     break;
                 // ...character selection.
-                case 1:
+                case Scene.CHARACTERSELECTION:
                     CharacterSelection();
                     break;
                 // ...fighting _enemies.
-                case 2:
+                case Scene.BATTLE:
                     Battle();
                     break;
                 // ...asking the _player to restart the game.
-                case 3:
-                    DisplayMainMenu();
+                case Scene.RESTARTMENU:
+                    DisplayRestartMenu();
                     break;
             }
         }
@@ -215,7 +289,7 @@ namespace BattleArena
         /// <summary>
         /// Displays the menu that allows the player to start or quit the game
         /// </summary>
-        private void DisplayMainMenu()
+        private void DisplayRestartMenu()
         {
             int choice = GetInput("Would you like to restart the game?", "Yes!", "No.");
             // Finds out whether the _player wishes to...
@@ -229,6 +303,34 @@ namespace BattleArena
                 // ...end the game.
                 case 1:
                     _gameOver = true;
+                    break;
+            }
+        }
+
+        public void DisplayStartMenu()
+        {
+            int choice = GetInput("Welcome to the Uncle Phil's Trail!", "Start New Game", "Load Game");
+
+            switch (choice)
+            {
+                case 0:
+                    _currentScene = Scene.NAMECREATION;
+                    break;
+                case 1:
+                    if (Load())
+                    {
+                        Console.WriteLine("Load Succssesful");
+                        Console.ReadKey(true);
+                        Console.Clear();
+                        _currentScene = Scene.BATTLE;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Load Failed");
+                        Console.ReadKey(true);
+                        Console.Clear();
+                        _currentScene = Scene.STARTMENU;
+                    }
                     break;
             }
         }
@@ -272,11 +374,11 @@ namespace BattleArena
             {
                 // ...be a more physical fighter.
                 case 0:
-                    _player = new Player(_playerName, 100, 35, 10, _offensiveInventory);
+                    _player = new Player(_playerName, 100, 35, 10, _offensiveInventory ,"Offensive");
                     break;
                 // ...or rely on defense more.
                 case 1:
-                    _player = new Player(_playerName, 75, 20, 15, _defensiveInventory);
+                    _player = new Player(_playerName, 75, 20, 15, _defensiveInventory, "Defensive");
                     break;
             }
 
@@ -381,7 +483,7 @@ namespace BattleArena
 
                 if(_currentEnemyIndex >= _enemies.Length)
                 {
-                    _currentScene = 3;
+                    _currentScene = Scene.RESTARTMENU;
                     Console.WriteLine("You are victorious!");
                     Console.ReadKey(true);
                     Console.Clear();
@@ -397,7 +499,7 @@ namespace BattleArena
             if(_player.Health <= 0)
             {
                 Console.WriteLine("You have been slain.");
-                DisplayMainMenu();
+                DisplayRestartMenu();
             }
         }
 
