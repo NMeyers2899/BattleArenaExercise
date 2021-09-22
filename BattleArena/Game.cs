@@ -71,11 +71,13 @@ namespace BattleArena
 
         public bool Load()
         {
+            bool loadingSuccessful = true;
+
             // If the file doesn't exist...
             if (!File.Exists("SaveData.txt"))
             {
                 // ...it returns false.
-                return false;
+                loadingSuccessful = false;
             }
 
             // Creates a reader.
@@ -85,7 +87,7 @@ namespace BattleArena
             if (!int.TryParse(reader.ReadLine(), out _currentEnemyIndex))
             {
                 // ...it returns false.
-                return false;
+                loadingSuccessful = false;
             }
 
             string job = reader.ReadLine();
@@ -100,7 +102,7 @@ namespace BattleArena
             }
             else
             {
-                return false;
+                loadingSuccessful = false;
             }
 
             _player.Job = job;
@@ -109,7 +111,7 @@ namespace BattleArena
             if (!_player.Load(reader))
             {
                 // ..it returns false.
-                return false;
+                loadingSuccessful = false;
             }
 
             // Creates a new instance of the current enemy.
@@ -119,7 +121,7 @@ namespace BattleArena
             if (!_currentEnemy.Load(reader))
             {
                 // ...it returns false.
-                return false;
+                loadingSuccessful = false;
             }
 
             // Updates the enemy array to the current enemy's stats.
@@ -128,7 +130,7 @@ namespace BattleArena
             // This closes the file.
             reader.Close();
 
-            return true;
+            return loadingSuccessful;
         }
 
         /// <summary>

@@ -59,12 +59,14 @@ namespace BattleArena
         {
             _items = new Item[0];
             _currentItem.Name = "Nothing";
+            _currentItemIndex = -1;
         }
 
         public Player(Item[] items) : base()
         {
             _currentItem.Name = "Nothing";
             _items = items;
+            _currentItemIndex = -1;
         }
 
         public Player(string name, float health, float attackPower, float defensePower, Item[] items, string job) : 
@@ -73,6 +75,7 @@ namespace BattleArena
             _items = items;
             _currentItem.Name = "Nothing";
             _job = job;
+            _currentItemIndex = -1;
         }
 
         /// <summary>
@@ -86,9 +89,11 @@ namespace BattleArena
             if(index >= _items.Length || index < 0)
             {
                 // ...it returns false.
+                _currentItemIndex = -1;
                 return false;
             }
 
+            // Updates currentItemIndex to be equal to the given index.
             _currentItemIndex = index;
 
             // Sets the current item to the item at the index.
@@ -157,9 +162,7 @@ namespace BattleArena
             }
 
             // If everything was found correctly, it attempts to equip the item.
-            TryEquipItem(_currentItemIndex);
-
-            return true;
+            return TryEquipItem(_currentItemIndex);
         }
     }
 }
